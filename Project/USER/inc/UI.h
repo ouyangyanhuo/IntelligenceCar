@@ -3,7 +3,6 @@
 
 #include "headfile.h"
 
-void stable_UI(void);
 void Electroma_UI(void);
 
 

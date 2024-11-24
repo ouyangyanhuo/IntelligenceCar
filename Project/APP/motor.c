@@ -32,9 +32,9 @@ void Motor_PWM_Final_Control(void)
 	//霍尔传感器为 0 正常驱动系统
 	if (0 == HALL_Stop_flag) {
 		if (0 == outtrack_flag) {
-			if (GO_accelerate_flag == 1) Motor_t.Pwm_MotorR = 3000;
-			else if (out_island_accelerate == 1) Motor_t.Pwm_MotorR = 3000;
-			else Motor_t.Pwm_MotorR = 2650;
+			if (GO_accelerate_flag == 1) Motor_t.Pwm_MotorR = 3900;
+			else if (out_island_accelerate == 1) Motor_t.Pwm_MotorR = 3200;
+			else Motor_t.Pwm_MotorR = 2800;
 		}
 		//出赛道
 		else if (1 == outtrack_flag) Motor_t.Pwm_MotorR = 0;
@@ -44,7 +44,7 @@ void Motor_PWM_Final_Control(void)
 		// 路程积分记录
 		if (1 == HALL_Stop_flag && HALL_Stop_encoder < HALL_Stop_Mileage_Points+1) HALL_Stop_encoder++;
 		//反转减速
-		if (HALL_Stop_encoder < HALL_Stop_Mileage_Points) Motor_t.Pwm_MotorR = 0;
+		if (HALL_Stop_encoder < HALL_Stop_Mileage_Points) Motor_t.Pwm_MotorR = -1500;
 		//停车
 		else Motor_t.Pwm_MotorR = 0;
 	}

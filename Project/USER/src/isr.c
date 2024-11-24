@@ -138,8 +138,12 @@ void TM0_Isr() interrupt 1
 
 extern long  Left_Adc, Right_Adc;						//横电感值
 extern long  Left_Adc2, Right_Adc2;						//竖电感值
+extern long  Middle_Adc;								//中间拟合电感
 extern int16 temp_right_pluse;							//右电机反馈值
 
+uint8 in_island_cnt = 0, into_island_flag = 0;			//环岛标志位
+uint8 out_island_flag = 0, out_island_cnt = 0;			//环岛计数
+uint8 island_nolonger = 0, island_nolonger_2 = 0;		//不再判断环 防止赛道其它部分出错
 uint16 IN_island_encoder = 0, OUT_island_encoder = 5;   //出入环岛编码计数值
 
 uint16 OUT_accelerate_encoder = 0;						//出环岛加速编码器值
@@ -151,7 +155,8 @@ uint8 GO_accelerate_flag = 1;
 uint16 Time_outtrack_cnt = 0;							//出赛道计数
 uint8 outtrack_flag = 0;								//出赛道标志
 
-uint16 encoder_GO_accelerate = 6000, encoder_OUT_accelerate = 5000;
+uint16 encoder_into_land = 3000, encoder_out_land = 12500;		//入环岛积分、出环岛积分
+uint16 encoder_GO_accelerate = 8000, encoder_OUT_accelerate = 5000;
 
 uint16 out_island_accelerate_flag_encoder = 0, out_island_accelerate_flag = 0;
 uint8 ZHIZOU = 0;
@@ -172,30 +177,30 @@ void TM1_Isr() interrupt 3
 	/**********  1.停车处理-出赛道处理 *********/
 
 	/************ 2.出入环岛处理 ***********/
-	if(Island_t.nolonger ==0){//不再判断环
+	if(island_nolonger==0){//不再判断环
 		if (Left_Adc == 100 && Right_Adc > 75 && Left_Adc2 >= 2){
-			Island_t.in_cnt++;				//计数一定值认为有环岛
-			if (Island_t.in_cnt >= 5){
-				Island_t.in_cnt = 0;
-				Island_t.into_flag = 1;		//置位环岛标志
+			in_island_cnt++;				//计数一定值认为有环岛
+			if (in_island_cnt >= 5){
+				in_island_cnt = 0;
+				into_island_flag = 1;		//置位环岛标志
 			}
 		}
 	}
 	//确定环岛后通过累计编码值来清空标志位，
-	if (Island_t.into_flag == 1)  IN_island_encoder += temp_right_pluse;  //记到一定值了认为已经进入环岛
-	if (IN_island_encoder >= ENCODER_ISLAND_INTO+2000){			//路程够了
-		Island_t.into_flag = 0;				//清空环岛标志位
+	if (into_island_flag == 1)  IN_island_encoder += temp_right_pluse;  //记到一定值了认为已经进入环岛
+	if (IN_island_encoder >= encoder_into_land+2500){			//路程够了
+		into_island_flag = 0;				//清空环岛标志位
 		IN_island_encoder = 0;
-		Island_t.out_flag = 1;
-		Island_t.nolonger = 1;
+		out_island_flag = 1;
+		island_nolonger = 1;
 	}
 	//和入环岛一样
-	if (Island_t.out_flag == 1) OUT_island_encoder += temp_right_pluse;
-	if (OUT_island_encoder >= ENCODER_ISLAND_OUT+3000){
-		Island_t.out_flag = 0;
+	if (out_island_flag == 1) OUT_island_encoder += temp_right_pluse;
+	if (OUT_island_encoder >= encoder_out_land+2800){
+		out_island_flag = 0;
 		OUT_island_encoder = 0;
-		out_island_accelerate_flag = 1;		//出环标志位加速
-		gpio_mode(P3_2, GPIO);				// 将P3.2设置为弱上拉
+		out_island_accelerate_flag = 1;		//出环岛延迟系统标志位
+		out_island_accelerate = 1;			//出环标志位加速
 	}
 	/************  2.出入环岛处理 ***********/
 
@@ -209,12 +214,11 @@ void TM1_Isr() interrupt 3
 	if (out_island_accelerate_flag == 1) out_island_accelerate_flag_encoder += temp_right_pluse;
 	if (out_island_accelerate_flag_encoder >= 2000) {
 		out_island_accelerate_flag_encoder = 0;
-		out_island_accelerate_flag = 0;					//标志位置回
-		out_island_accelerate = 1;						//开始加速标志位
+		out_island_accelerate_flag = 0;
 	}
 
 	if (out_island_accelerate == 1) OUT_accelerate_encoder += temp_right_pluse;
-	if (OUT_accelerate_encoder >= 1000) ZHIZOU = 1;		//出环岛后暂时不检测电感，保持垂直出岛的稳定
+	if (OUT_accelerate_encoder >= 2500) ZHIZOU = 1;		//出环岛后暂时不检测电感，保持垂直出岛的稳定
 	if (OUT_accelerate_encoder >= encoder_OUT_accelerate) {
 		OUT_accelerate_encoder = 0;
 		out_island_accelerate = 0;		//出环回归正常
@@ -224,7 +228,7 @@ void TM1_Isr() interrupt 3
 
 	//控制系统
 	Motor_PWM_Final_Control();	//电机控制
-	Car_Control();				//舵机控制
+	Servo_Init_2();				//舵机控制
 }
 
 

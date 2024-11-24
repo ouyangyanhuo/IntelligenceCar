@@ -13,14 +13,6 @@ typedef struct {
 	uint16 Pwm_Servo;				// 舵机输出
 }SERVO_CONTROL;
 
-typedef struct {
-	uint8 in_cnt;
-	uint8 into_flag;
-	uint8 out_flag;
-	uint8 nolonger;
-}ISLAND_RESOLVE;
-
-extern ISLAND_RESOLVE Island_t;
 extern SERVO_PID_PARAMETERS Servo_pid_t;
 extern SERVO_CONTROL Servo_t;
 
@@ -36,19 +28,20 @@ extern SERVO_CONTROL Servo_t;
 
 
 /***  出入环岛编码 ***/
-#define IN_ISLAND_ENCODER_MAX		500
-#define OUT_ISLAND_ENCODER_MAX		1200
+#define IN_ISLAND_ENCODER_MAX     500
+#define OUT_ISLAND_ENCODER_MAX    1200
 
 /***  出入环岛编码 ***/
 
-/***  出入环岛积分 ***/
-#define ENCODER_ISLAND_INTO			3000
-#define ENCODER_ISLAND_OUT			10500
-/***  出入环岛积分 ***/
+//进环岛积分
+#define ISLAND_INTEGRAL_JF			(200)		//后续手测积分
+//进环岛积分-2 短暂打角
+#define ISLAND_INTEGRAL_JF2			(150)		//后续手测积分
 
 void Servo_Init(void);
 void Car_Control(void);
 uint16 PID_Servo(float error, SERVO_PID_PARAMETERS* Servo_pid_t);
 void Servo_Ctrl(uint16 Duty);
+void Servo_Init_2(void);
 
 #endif

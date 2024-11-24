@@ -1,6 +1,6 @@
 #include "headfile.h"
 
-int16 temp_right_pluse = 0;
+uint16 temp_right_pluse = 0;
 //读编码器数据
 void encoderValue_get(void)
 {	
@@ -14,5 +14,9 @@ void encoderValue_get(void)
 	if (1 == SPEEDR_DIR)           //右边电机
 	{
 		temp_right_pluse = -temp_right_pluse;   //正转
+	}
+	else
+	{
+		temp_right_pluse = temp_right_pluse;  //反转
 	}
 }

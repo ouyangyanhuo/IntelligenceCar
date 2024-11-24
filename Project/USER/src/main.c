@@ -49,7 +49,14 @@
 // // //      佛祖保佑      永无BUG      永不修改			 \\ \\ \\
 // // // // // // || || || || || || || || || || \\ \\ \\ \\ \\ */
 
-uint8 UI_count = 0, time_count = 0;
+
+
+extern uint8 out_island_flag, into_island_flag;         //环岛标志位
+extern uint16 IN_island_encoder, OUT_island_encoder;    //出入环岛编码计数值
+
+extern uint16 encoder_into_land, encoder_out_land;
+
+uint8 UI_count = 2, time_count = 0;
 void main()
 {
 		DisableGlobalIRQ();								//关闭总中断
@@ -62,7 +69,6 @@ void main()
 		lcd_init();							//LCD屏幕初始化
 		Motor_Command_Init();				//电机初始化
 		pwm_init(P33,50,0);					//舵机初始化
-		Servo_Init();						//舵机参数初始化
 		Adinductance_init();				//电感初始化
 		pit_timer_ms(TIM_1, 2);				//2ms执行定时器1中断
 		EnableGlobalIRQ();					//开启总中断

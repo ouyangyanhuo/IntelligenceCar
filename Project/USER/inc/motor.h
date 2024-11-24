@@ -6,7 +6,7 @@
 /* 霍尔传感器引脚 */
 #define HALL_PIN P44
 /* 停车路程积分 */
-#define HALL_Stop_Mileage_Points 2000
+#define HALL_Stop_Mileage_Points 1300
 
 typedef struct {
 	uint16 Pwm_MotorR;				// 舵机输出
