@@ -1,10 +1,10 @@
 #include "headfile.h"
 
-uint16 temp_right_pluse = 0;
+int16 temp_right_pluse = 0;
+
 //读编码器数据
 void encoderValue_get(void)
-{	
-	ctimer_count_init(SPEEDR_PLUSE);
+{
 	temp_right_pluse = ctimer_count_read(SPEEDR_PLUSE);
 
 	//计数器清零

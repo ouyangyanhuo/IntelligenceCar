@@ -8,12 +8,12 @@ ADCN_enum adcn 参数是指接口
 long AD_Bias = 0, AD_Bias_last = 0;    //差比和算法后的偏差值
 int16 adc_deal_last[4];					//储存电感采集值
 //可能是long类型，但会出现编译警告
-long Left_Adc = 0, Right_Adc = 0;		//电感值
-long Left_Adc2 = 0, Right_Adc2 = 0;		//电感值
-long Middle_Adc = 0;					//中间电感拟合
-long ElectromaError_Out_Value = 0;		//最终输出值
+uint16 Left_Adc = 0, Right_Adc = 0;		//电感值
+uint16 Left_Adc2 = 0, Right_Adc2 = 0;		//电感值
+uint16 Middle_Adc = 0;					//中间电感拟合
 
 int16 adc_max[4] = { 300,300,300,300 };	//归一化电感最大值，左一右一左二右二
+long ElectromaError_Out_Value = 0;		//两边两个横电感的差比和
 
 int16 debug_left, debug_right, debug_left2, debug_right2, debug_middle; //Debug用
 /**
@@ -97,8 +97,8 @@ void ADC_Final_Read_Deal() {
 
 	//归一化电感值
 	Left_Adc = (adc_deal_last[LEFT_1] * 100) / adc_max[0];
-	Left_Adc2 = (adc_deal_last[LEFT_2] * 100) / adc_max[2];
 	Right_Adc = (adc_deal_last[RIGHT_1] * 100) / adc_max[1];
+	Left_Adc2 = (adc_deal_last[LEFT_2] * 100) / adc_max[2];
 	Right_Adc2 = (adc_deal_last[RIGHT_2] * 100) / adc_max[3];
 
 	//拟合中间电感
@@ -116,9 +116,10 @@ void ADC_Final_Read_Deal() {
 	AD_Bias_Temp2 = ((Right_Adc + Right_Adc2) - (Left_Adc + Left_Adc2)) * 100 / ((Right_Adc + Right_Adc2) + (Left_Adc + Left_Adc2));
 	//右转小 左转大
 	AD_Bias = AD_Bias_Temp1 - AD_Bias_Temp2;
-	//向舵机传入打角
-	ElectromaError_Out_Value = -AD_Bias;
+	ElectromaError_Out_Value = AD_Bias_Temp2*2;
+
 }
+
 
 /**
   * @brief  电感归一化限幅函数,见电感最终值限幅在0-100范围内

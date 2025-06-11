@@ -17,6 +17,7 @@
 
 void Adinductance_init(void);
 int16 ADC_Del_MaxMin_Average_Filter(int16* ADC);
+uint16 ADC_average_filter(ADCN_enum adcn, ADCRES_enum resolution, uint8 count);
 void ADC_Final_Read_Deal();
 int16 ADC_Limit(int16 in_adc, int8 max, int8 min);
 

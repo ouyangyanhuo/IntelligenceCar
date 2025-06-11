@@ -1,9 +1,9 @@
 #include "headfile.h"
 
-uint16 temp_right_pluse = 0;
+int16 temp_right_pluse = 0;
 //¶Á±àÂëÆ÷Êý¾Ý
 void encoderValue_get(void)
-{	
+{
 	ctimer_count_init(SPEEDR_PLUSE);
 	temp_right_pluse = ctimer_count_read(SPEEDR_PLUSE);
 

@@ -6,10 +6,10 @@ SERVO_CONTROL Servo_t;
 extern uint8 outtrack_flag;                             //出赛道标志
 extern long ElectromaError_Out_Value;                   //两边两个横电感的差比和
 extern uint8 out_island_flag, into_island_flag;         //环岛标志位
-extern uint16 IN_island_encoder, OUT_island_encoder;    //出入环岛编码计数值
+extern uint16 OUT_island_encoder;    //出入环岛编码计数值
+extern long Left_Adc, Right_Adc, Left_Adc2, Right_Adc2, Middle_Adc;		//归一化电感值
 
-extern uint16 encoder_into_land, encoder_out_land;
-extern uint8 ZHIZOU;
+extern const uint16 encoder_out_land;
 
 extern uint8 out_island_accelerate;
 /**
@@ -19,8 +19,12 @@ extern uint8 out_island_accelerate;
 
 void Servo_Init(void) {
     // 舵机PID
-    Servo_pid_t.Dir_Kp = 0.0177578665f;
-    Servo_pid_t.Dir_Kd = 1.354568f;
+    if (Left_Adc>60&&Right_Adc>60&& Left_Adc2 == 0 && Right_Adc2 ==0) Servo_pid_t.Dir_Kp = 0.010955f;
+    else Servo_pid_t.Dir_Kp = 0.006955f;
+    //Servo_pid_t.Dir_Kp = 0.016955f;
+    //Servo_pid_t.Dir_Kp = 0.02555f;
+    Servo_pid_t.Dir_Kd = 1.376568f;
+    //Servo_pid_t.Dir_Kd = 3;
 }
 /*
 * 0.0174 1.395
@@ -33,24 +37,11 @@ void Servo_Init(void) {
 */
 
 void Car_Control(void) {
-    float Direction_error_get = 0;
     // 转向舵机控制
     if (0 == outtrack_flag) {
-        if (into_island_flag == 1 && out_island_flag == 0 && IN_island_encoder > encoder_into_land) {                                //入环岛
-            Servo_t.Out_Direction = -160;           //打固定角度
-            gpio_mode(P3_2, GPO_PP);			    // 将P3.2设置为推挽输出
-        }
-        else if (out_island_flag == 1 && OUT_island_encoder > encoder_out_land)  //出环岛
-        {
-            Servo_t.Out_Direction = -160;          //打固定角度
-            gpio_mode(P3_2, GPIO);			// 将P3.2设置为弱上拉
-        }
-        /*else if (out_island_accelerate == 1 && ZHIZOU == 0) {
-            Servo_t.Out_Direction = 0;
-        }*/
-        else {
-            Servo_t.Out_Direction = PID_Servo(ElectromaError_Out_Value, &Servo_pid_t);
-        }
+        if (into_island_flag == 2) Servo_t.Out_Direction = -150;
+        else if (out_island_flag = 1 && OUT_island_encoder > encoder_out_land) Servo_t.Out_Direction = -150;
+        else Servo_t.Out_Direction = PID_Servo(ElectromaError_Out_Value, &Servo_pid_t);
     }
     else if (1 == outtrack_flag) {
         Servo_t.Out_Direction = PID_Servo(0, &Servo_pid_t);

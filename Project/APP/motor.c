@@ -8,10 +8,11 @@
 extern uint8 outtrack_flag;				//出赛道标志
 extern uint8 out_island_accelerate;
 extern uint8 GO_accelerate_flag;
-extern int16 temp_right_pluse;							//右电机反馈值
+extern uint8 island_stop;
 
 uint8 HALL_Stop_flag = 0;				//霍尔检测 0 为未检测到 1 为已检测到
 uint16 HALL_Stop_encoder = 0;
+
 MOTOR_CONTROL Motor_t;
 
 /**
@@ -27,14 +28,17 @@ void Motor_Command_Init(void)
   */
 void Motor_PWM_Final_Control(void)
 {
-	if (HALL_PIN == 0) HALL_Stop_flag = 1;		//霍尔检测
+	if (HALL_PIN == 0 && GO_accelerate_flag == 0) HALL_Stop_flag = 1;		//霍尔检测
 
 	//霍尔传感器为 0 正常驱动系统
 	if (0 == HALL_Stop_flag) {
 		if (0 == outtrack_flag) {
-			if (GO_accelerate_flag == 1) Motor_t.Pwm_MotorR = 3900;
-			else if (out_island_accelerate == 1) Motor_t.Pwm_MotorR = 3200;
-			else Motor_t.Pwm_MotorR = 2800;
+			/*if (island_stop == 1) Motor_t.Pwm_MotorR = -2500;
+			else if (island_stop == 0){*/
+				if (GO_accelerate_flag == 1 && out_island_accelerate == 0) Motor_t.Pwm_MotorR = 3800;
+				//else if (GO_accelerate_flag == 0 && out_island_accelerate == 1) Motor_t.Pwm_MotorR = 3800;
+				else Motor_t.Pwm_MotorR = 3000; 
+			//}
 		}
 		//出赛道
 		else if (1 == outtrack_flag) Motor_t.Pwm_MotorR = 0;
@@ -42,9 +46,9 @@ void Motor_PWM_Final_Control(void)
 	//霍尔传感器为 1 停车驱动逻辑
 	else if (1 == HALL_Stop_flag) {
 		// 路程积分记录
-		if (1 == HALL_Stop_flag && HALL_Stop_encoder < HALL_Stop_Mileage_Points+1) HALL_Stop_encoder++;
+		if (1 == HALL_Stop_flag && HALL_Stop_encoder < HALL_Stop_Mileage_Points) HALL_Stop_encoder++;
 		//反转减速
-		if (HALL_Stop_encoder < HALL_Stop_Mileage_Points) Motor_t.Pwm_MotorR = -1500;
+		if (HALL_Stop_encoder < HALL_Stop_Mileage_Points) Motor_t.Pwm_MotorR = -1300;
 		//停车
 		else Motor_t.Pwm_MotorR = 0;
 	}

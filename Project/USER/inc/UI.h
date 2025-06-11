@@ -3,7 +3,9 @@
 
 #include "headfile.h"
 
-void Electroma_UI(void);
-
+void UI_Control();
+void Electroma_UI();
+void Servo_UI();
+void UI_Init();
 
 #endif
